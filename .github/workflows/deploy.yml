@@ -1,0 +1,44 @@
+# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
+
+
+# this would be the name of the workflow
+name: Node.js CI
+
+# these are the names of the github events that triggers the workflow
+# other events could be issues, contributor joining etc..
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [16.7.0]
+        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+
+    steps:
+    # -uses is checking out repository. "actions" path in github are where predefined actions
+    # are hosted, basically we are accessing this repo : https://github.com/actions/checkout
+    # this is what is done in background : https://github.com/actions/checkout/blob/main/action.yml
+    # If you want to use any actions that are predefined you can use "uses" keyword
+    - uses: actions/checkout@v3
+    
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        
+    # this is similar to npm install
+    - run: npm ci
+
+    - run: npm run build --if-present
+    
+    - run: CI=true npm test
